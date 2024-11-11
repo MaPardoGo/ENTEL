@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACHS</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Consulta ServiceNow</h1>
+        <p>Hola CallDispatcher, para hacerte la vida más fácil, creé esto con mucha paciencia y amor. ¡Espero que te sirva!</p>
+    </header>
+
+    <div>
+        <form action="{{ url_for('handle_request') }}" method="post">
+            <button onclick="generarReporte()">Presionar botón</button>
+        </form>
+    </div>
+
+    <script>
+        function generarReporte() {
+            fetch('/request', { method: 'POST' })
+                .then(response => response.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'reporteResidencia.xlsx';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                })
+                .catch(error => console.error('Error al generar el reporte:', error));
+        }
+    </script>
+</body>
+</html>

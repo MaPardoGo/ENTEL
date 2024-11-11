@@ -1,0 +1,17 @@
+body {
+    background-color: aliceblue;
+    justify-items: center;
+}
+
+header h2 {
+    font-size: xx-large;
+}
+
+header p {
+    font-size: medium;
+}
+
+div {
+    padding-bottom: 5px ;
+    justify-content: space-between;
+}
