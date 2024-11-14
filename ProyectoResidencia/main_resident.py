@@ -37,10 +37,21 @@ if __name__ == '__main__':
             'description,'
         ],
     }
-    params_wfm = {
+    params_wfm_pendientes = {
         
         'sysparm_query': 
         f"{base_query}^state=1^ORstate=2^ORstate=-5",
+        'sysparm_fields': [
+            'parent,'
+            'number,'
+            'state,'
+            'u_sla_start,'
+            ],
+    }
+    params_wfm_todos = {
+        
+        'sysparm_query': 
+        f"{base_query}^state=1^ORstate=2^ORstate=-5^ORstate=4",
         'sysparm_fields': [
             'parent,'
             'number,'
@@ -52,12 +63,14 @@ if __name__ == '__main__':
     # Obtener registros de tablas
     incident_records = registers('incident', params_inc)
     req_item_records = registers('sc_req_item', params_ritm)
-    all_ent_agendador = registers_wfm('u_ent_agendador', params_wfm)
+    pend_ent_agendador = registers_wfm('u_ent_agendador', params_wfm_pendientes)
+    all_ent_agendador = registers_wfm('u_ent_agendador', params_wfm_todos)
 
     # Convertir registros obtenidos en dataframe
     incident_df = pd.DataFrame(incident_records)
     req_item_df = pd.DataFrame(req_item_records)
-    ent_agendador_df = pd.DataFrame(all_ent_agendador)
+    pend_ent_agendador_df = pd.DataFrame(pend_ent_agendador)
+    todos_ent_agendador_df = pd.DataFrame(all_ent_agendador)
 
     #Consolidar registros en un dataframe
     reporte_sentral = pd.concat([incident_df, req_item_df], ignore_index=True)
@@ -65,13 +78,13 @@ if __name__ == '__main__':
     #Combinar datos de consolidado con agendamientos
     reporte_consolidado = pd.merge(
         reporte_sentral,        # DataFrame principal (la hoja consolidada)
-        ent_agendador_df,       # DataFrame de referencia (la hoja WFM)
+        pend_ent_agendador_df,  # DataFrame de referencia (la hoja WFM)
         left_on='sys_id',       # Columna en la hoja consolidada
         right_on='parent',      # Columna en la hoja WFM
         how='left'              # Tipo de merge: 'left' mantiene todos los valores de la izquierda
     )
     reporte_wfm = pd.merge(
-        ent_agendador_df,       # DataFrame de referencia (la hoja WFM)
+        todos_ent_agendador_df,       # DataFrame de referencia (la hoja WFM)
         reporte_sentral,        # DataFrame principal (la hoja consolidada)
         
         left_on='parent',       # Columna en la hoja consolidada
@@ -85,8 +98,8 @@ if __name__ == '__main__':
     #Identificación de hojas excel
     dict_sheetname = {
         'Consolidado': reporte_sentral,
-        'Merge_TKT': reporte_consolidado,
-        'Merge WFM': reporte_wfm
+        'En Gestión': reporte_consolidado,
+        'Cantidad de Gestiones': reporte_wfm
         }
     
     # Genera consolidado de INC y RITM
